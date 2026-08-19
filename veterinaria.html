@@ -1,0 +1,213 @@
+<?php
+require_once 'config/conexion.php';
+require_once 'classes/Mascota.php';
+
+$mensaje = "";
+$totalMascotas = 0;
+
+try {
+    $db = (new ConexionDB())->conectar();
+    $totalMascotas = Mascota::obtenerTotal($db);
+} catch (Exception $e) {
+    $totalMascotas = 0;
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    try {
+        $mascota = new Mascota(
+            $_POST['nombre'],
+            $_POST['especie'],
+            $_POST['raza'],
+            $_POST['edad'],
+            $_POST['peso'],
+            $_POST['color_senas'],
+            $_POST['nombre_propietario'],
+            $_POST['dni'],
+            $_POST['telefono'],
+            $_POST['observaciones'] ?? ''
+        );
+
+        if ($mascota->guardar($db)) {
+            $mensaje = '<div class="w3-panel w3-teal w3-round w3-padding"><b>¡Éxito!</b> Paciente registrado correctamente.</div>';
+            $totalMascotas = Mascota::obtenerTotal($db);
+        }
+    } catch (Exception $e) {
+        $mensaje = '<div class="w3-panel w3-red w3-round w3-padding"><b>Error:</b> ' . $e->getMessage() . '</div>';
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Veterinario | San Francisco</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+    <aside class="w3-sidebar w3-bar-block w3-white w3-card" style="width: 260px;">
+        <div class="w3-padding-24 w3-container">
+            <h3 class="w3-large w3-bold w3-text-teal" style="margin:0;"><b>Vet. San Francisco</b></h3>
+            <span class="w3-tiny w3-text-grey">Sistema Médico Veterinario</span>
+            
+            <div class="w3-card w3-light-grey w3-padding w3-margin-top" style="border-radius: 10px;">
+                <span class="w3-tiny w3-text-grey">Administrador</span><br>
+                <strong class="w3-small">Dr. Carlos Mendoza</strong>
+            </div>
+        </div>
+
+        <nav class="w3-small w3-padding-small">
+            <div class="w3-padding-small w3-text-grey w3-bold">MASCOTAS</div>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Lista de Mascotas</a>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-teal w3-hover-teal">Registro de Pacientes</a>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Actualizar Datos de Mascota</a>
+
+            <div class="w3-padding-small w3-text-grey w3-bold w3-margin-top">CIRUGÍAS</div>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Calendario de Cirugías</a>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Programar Cirugía</a>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Seguimiento Postoperatorio</a>
+
+            <div class="w3-padding-small w3-text-grey w3-bold w3-margin-top">VACUNACIÓN</div>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Historial de Vacunación</a>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Registrar Nueva Vacuna</a>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Próximas Vacunas</a>
+
+            <div class="w3-padding-small w3-text-grey w3-bold w3-margin-top">FARMACIA</div>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Inventario de Farmacia</a>
+
+            <div class="w3-padding-small w3-text-grey w3-bold w3-margin-top">FACTURACIÓN</div>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Nueva Factura</a>
+
+            <div class="w3-padding-small w3-text-grey w3-bold w3-margin-top">CONFIGURACIÓN</div>
+            <a href="#" class="w3-bar-item w3-button sidebar-item w3-hover-teal">Datos de la Clínica</a>
+        </nav>
+    </aside>
+
+    <main style="margin-left: 260px;" class="w3-padding-24">
+        <div class="w3-container">
+            
+            <div class="w3-margin-bottom">
+                <span class="w3-tiny w3-text-grey w3-bold" style="letter-spacing: 1px;">PANEL ADMINISTRATIVO</span>
+                <h2 class="w3-xlarge w3-bold" style="margin: 0; color: #1e293b;">Registro de Pacientes</h2>
+            </div>
+
+            <?php echo $mensaje; ?>
+
+            <div class="w3-row-padding w3-margin-bottom" style="margin: 0 -12px;">
+                <div class="w3-third w3-margin-bottom">
+                    <div class="card-custom w3-padding-16 w3-container">
+                        <span class="w3-tiny w3-text-grey w3-bold">TOTAL DE MASCOTAS</span>
+                        <h2 class="w3-xxlarge w3-bold" style="margin:0; color: #0f172a;"><?php echo $totalMascotas; ?></h2>
+                        <span class="w3-tiny w3-text-grey">Expedientes registrados</span>
+                    </div>
+                </div>
+
+                <div class="w3-third w3-margin-bottom">
+                    <div class="card-custom w3-padding-16 w3-container">
+                        <span class="w3-tiny w3-text-grey w3-bold">MÓDULO ACTIVO</span>
+                        <h3 class="w3-large w3-bold" style="margin: 4px 0 0 0; color: #0f172a;">Mascotas</h3>
+                        <span class="w3-tiny w3-text-grey">Registro y seguimiento</span>
+                    </div>
+                </div>
+
+                <div class="w3-third w3-margin-bottom">
+                    <div class="card-custom w3-padding-16 w3-container">
+                        <span class="w3-tiny w3-text-grey w3-bold">ESTADO DEL SISTEMA</span>
+                        <h3 class="w3-large w3-bold w3-text-teal" style="margin: 4px 0 0 0;">Disponible</h3>
+                        <span class="w3-tiny w3-text-grey">Conexión segura PDO</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom w3-padding-24">
+                
+                <div class="w3-row w3-margin-bottom">
+                    <div class="w3-col m8">
+                        <h3 class="w3-large w3-bold" style="margin: 0; color: #1e293b;">
+                            <i class="fa-solid fa-plus w3-text-teal w3-margin-right"></i>Registro de Pacientes
+                        </h3>
+                    </div>
+                    <div class="w3-col m4 w3-right-align">
+                        <span class="w3-tiny w3-text-grey">Complete la información de la mascota y su propietario</span>
+                    </div>
+                </div>
+
+                <form action="" method="POST">
+                    
+                    <div class="w3-row-padding" style="margin: 0 -12px;">
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Nombre de la mascota</label>
+                            <input class="w3-input input-custom" type="text" name="nombre" required>
+                        </div>
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Especie</label>
+                            <select class="w3-select input-custom" name="especie" required>
+                                <option value="" disabled selected>Seleccione</option>
+                                <option value="Canino">Canino</option>
+                                <option value="Felino">Felino</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Raza</label>
+                            <input class="w3-input input-custom" type="text" name="raza" required>
+                        </div>
+                    </div>
+
+                    <div class="w3-row-padding" style="margin: 0 -12px;">
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Edad (años)</label>
+                            <input class="w3-input input-custom" type="number" name="edad" required>
+                        </div>
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Peso actual (kg)</label>
+                            <input class="w3-input input-custom" type="number" step="0.01" name="peso" required>
+                        </div>
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Color o señas físicas</label>
+                            <input class="w3-input input-custom" type="text" name="color_senas">
+                        </div>
+                    </div>
+
+                    <div class="w3-row-padding" style="margin: 0 -12px;">
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Nombre del propietario</label>
+                            <input class="w3-input input-custom" type="text" name="nombre_propietario" required>
+                        </div>
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">DNI del propietario</label>
+                            <input class="w3-input input-custom" type="text" name="dni" placeholder="0000-0000-00000" required>
+                        </div>
+                        <div class="w3-third w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Teléfono de emergencia</label>
+                            <input class="w3-input input-custom" type="text" name="telefono" required>
+                        </div>
+                    </div>
+
+                    <div class="w3-row-padding" style="margin: 0 -12px;">
+                        <div class="w3-col s12 w3-margin-bottom">
+                            <label class="w3-small w3-bold w3-text-grey">Alergias / Observaciones</label>
+                            <textarea class="w3-textarea input-custom w3-input" name="observaciones" rows="3" placeholder="Describa alergias, tratamientos u observaciones importantes"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="w3-margin-top">
+                        <button type="submit" class="w3-btn btn-primary-custom w3-padding">
+                            <i class="fa-solid fa-floppy-disk"></i> Registrar Paciente
+                        </button>
+                        <button type="reset" class="w3-btn btn-secondary-custom w3-padding w3-margin-left">
+                            Limpiar
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>
